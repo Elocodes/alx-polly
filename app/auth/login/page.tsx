@@ -3,15 +3,24 @@
 import { useState } from 'react';
 import { Button, Input } from '@/components/ui';
 import Link from 'next/link';
+import { useAuth } from '../context/auth-context';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement login functionality
-    console.log('Login attempt with:', { email, password });
+    try {
+      await login(email, password);
+      router.push('/polls');
+    } catch (error) {
+      console.error('Login failed:', error);
+      // TODO: Handle login errors (e.g., show a notification)
+    }
   };
 
   return (

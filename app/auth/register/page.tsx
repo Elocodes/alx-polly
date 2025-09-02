@@ -3,17 +3,31 @@
 import { useState } from 'react';
 import { Button, Input } from '@/components/ui';
 import Link from 'next/link';
+import { useAuth } from '../context/auth-context';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const { register } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement registration functionality
-    console.log('Registration attempt with:', { name, email, password });
+    if (password !== confirmPassword) {
+      // TODO: Handle password mismatch error
+      console.error('Passwords do not match');
+      return;
+    }
+    try {
+      await register(name, email, password);
+      router.push('/polls');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      // TODO: Handle registration errors (e.g., show a notification)
+    }
   };
 
   return (

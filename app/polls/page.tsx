@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Button } from '@/components/ui';
 import Link from 'next/link';
+import ProtectedRoute from '../auth/protected-route';
 
 // Mock data for polls
 const mockPolls = [
@@ -32,7 +33,7 @@ const mockPolls = [
   },
 ];
 
-export default function PollsPage() {
+function PollsPageContent() {
   return (
     <div className="container py-10">
       <div className="flex justify-between items-center mb-8">
@@ -64,5 +65,13 @@ export default function PollsPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function PollsPage() {
+  return (
+    <ProtectedRoute>
+      <PollsPageContent />
+    </ProtectedRoute>
   );
 }

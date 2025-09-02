@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { Button, Input, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui';
+import ProtectedRoute from '../auth/protected-route';
 
-export default function CreatePollPage() {
+function CreatePollPageContent() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [options, setOptions] = useState(['', '']);
@@ -121,4 +122,12 @@ export default function CreatePollPage() {
       </Card>
     </div>
   );
+}
+
+export default function CreatePollPage() {
+    return (
+        <ProtectedRoute>
+            <CreatePollPageContent />
+        </ProtectedRoute>
+    )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui';
+import ProtectedRoute from '@/app/auth/protected-route';
 
 // Mock data for a single poll
 const mockPoll = {
@@ -20,7 +21,7 @@ const mockPoll = {
   createdAt: '2023-06-15',
 };
 
-export default function PollPage({ params }: { params: { id: string } }) {
+function PollPageContent({ params }: { params: { id: string } }) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
 
@@ -108,4 +109,12 @@ export default function PollPage({ params }: { params: { id: string } }) {
       </Card>
     </div>
   );
+}
+
+export default function PollPage({ params }: { params: { id: string } }) {
+    return (
+        <ProtectedRoute>
+            <PollPageContent params={params} />
+        </ProtectedRoute>
+    )
 }

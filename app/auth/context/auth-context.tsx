@@ -1,12 +1,10 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-} | null;
+type User = SupabaseUser | null;
 
 type AuthContextType = {
   user: User;
@@ -23,57 +21,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Check if user is already logged in (e.g., from localStorage or session)
-    setIsLoading(false);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    try {
-      // TODO: Implement actual login logic
-      // Mock successful login for now
-      setUser({
-        id: '1',
-        name: 'Test User',
-        email: email,
-      });
-    } catch (error) {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
       console.error('Login failed:', error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
-    try {
-      // TODO: Implement actual registration logic
-      // Mock successful registration for now
-      setUser({
-        id: '1',
-        name: name,
-        email: email,
-      });
-    } catch (error) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+        }
+      }
+    });
+    if (error) {
       console.error('Registration failed:', error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const logout = async () => {
     setIsLoading(true);
-    try {
-      // TODO: Implement actual logout logic
-      setUser(null);
-    } catch (error) {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
       console.error('Logout failed:', error);
       throw error;
-    } finally {
-      setIsLoading(false);
     }
+    setUser(null);
+    setIsLoading(false);
   };
 
   return (
