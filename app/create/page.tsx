@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button, Input, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui';
 import ProtectedRoute from '../auth/protected-route';
+import { supabase } from '@/lib/supabase';
 
 function CreatePollPageContent() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [options, setOptions] = useState(['', '']);
+  const router = useRouter();
   
   const addOption = () => {
     setOptions([...options, '']);
@@ -36,15 +39,50 @@ function CreatePollPageContent() {
       return;
     }
 
-    // TODO: Implement actual poll creation logic
-    console.log('Creating poll:', { title, description, options: validOptions });
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert('You must be logged in to create a poll.');
+      router.push('/auth/login');
+      return;
+    }
+
+    // Insert the poll
+    const { data: poll, error: pollError } = await supabase
+      .from('polls')
+      .insert({ question: title, user_id: user.id })
+      .select()
+      .single();
+
+    if (pollError || !poll) {
+      console.error('Error creating poll:', pollError);
+      alert('There was an error creating your poll. Please try again.');
+      return;
+    }
+
+    // Insert the poll options
+    const pollOptions = validOptions.map(option => ({
+      text: option,
+      poll_id: poll.id,
+    }));
+
+    const { error: optionsError } = await supabase.from('poll_options').insert(pollOptions);
+
+    if (optionsError) {
+      console.error('Error creating poll options:', optionsError);
+      alert('There was an error creating the poll options. Please try again.');
+      // Optionally, delete the poll that was just created
+      await supabase.from('polls').delete().match({ id: poll.id });
+      return;
+    }
     
     // Reset form after submission
     setTitle('');
     setDescription('');
     setOptions(['', '']);
     
-    // TODO: Redirect to the newly created poll
+    alert('Poll created successfully!');
+    router.push('/polls');
   };
 
   return (
