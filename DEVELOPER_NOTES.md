@@ -4,43 +4,128 @@ This document serves as a high-level technical overview and development log for 
 
 ## 1. Project Vision & Architecture
 
--   **Core Idea:** A simple, modern polling application where users can sign up, create polls, and vote on them.
--   **Frontend:** Built with Next.js using the App Router. This choice was made for its modern features, server-side rendering capabilities, and clear project structure.
--   **Backend & Database:** Supabase was chosen as the Backend-as-a-Service (BaaS). This decision significantly simplifies development by providing authentication, a Postgres database, and APIs out of the box, allowing me to focus on the frontend and user experience.
--   **Styling:** The project uses Tailwind CSS with shadcn/ui for a clean, utility-first approach to styling and a set of pre-built, accessible components.
+-   **Core Idea:** A comprehensive polling application where users can register, create polls, vote on them, and manage their polls with full CRUD operations.
+-   **Frontend:** Built with Next.js 15 using the App Router for modern React patterns, server-side rendering, and optimal performance.
+-   **Backend & Database:** Supabase provides authentication, PostgreSQL database, and real-time capabilities. The database schema includes polls, poll_options, and votes tables with proper foreign key relationships.
+-   **Styling:** Tailwind CSS v4 with custom shadcn/ui components for a modern, accessible, and consistent design system.
+-   **State Management:** React Context for authentication state, with local component state for UI interactions.
 
-## 2. Development Log & Key Milestones
+## 2. Database Schema & Architecture
 
-### Phase 1: Authentication Setup (September 2025)
+The application uses a well-structured relational database with three main tables:
 
-The initial development phase focused on establishing a secure and robust authentication system, as it's the foundation for all user-specific interactions.
+-   **polls:** Stores poll questions, creator ID, and timestamps
+-   **poll_options:** Stores individual options for each poll with cascade deletion
+-   **votes:** Tracks user votes with references to options, users, and polls
 
--   **Technology:** `supabase-js` library was integrated into the Next.js application.
--   **Supabase Client:** A singleton Supabase client was created in `lib/supabase.ts` to be used throughout the application. It's configured using environment variables (`.env.local`) for security.
--   **Authentication Logic (`AuthContext`):**
-    -   A React Context (`app/auth/context/auth-context.tsx`) was created to manage the global authentication state.
-    -   This context handles user login, registration, and logout by making asynchronous calls to Supabase Auth.
-    -   It listens for `onAuthStateChange` events from Supabase, automatically updating the application's state when a user logs in or out. This provides a seamless, real-time experience.
--   **UI Implementation:**
-    -   The login (`/auth/login`) and register (`/auth/register`) pages were updated to use the `AuthContext`. The forms now capture user input and trigger the respective authentication functions.
-    -   Upon successful login or registration, the user is programmatically redirected to the main polls page using Next.js's `useRouter`.
--   **Route Protection:**
-    -   A Higher-Order Component (HOC), `app/auth/protected-route.tsx`, was created to restrict access to certain pages.
-    -   This component checks the user's authentication state via the `AuthContext`. If the user is not logged in, it redirects them to the login page.
-    -   This protection was applied to the main poll listing, poll creation, and individual poll view pages to ensure only authenticated users can access them.
+All tables use UUID primary keys for security and scalability, with proper foreign key constraints ensuring data integrity.
 
-## 3. Development Environment & Tooling
+## 3. Development Log & Key Milestones
 
-This project was developed in a collaborative environment, leveraging modern AI-powered tools to accelerate development and ensure best practices.
+### Phase 1: Authentication Foundation (Initial Setup)
 
--   **Primary Tool:** The Gemini CLI was used extensively for a variety of software engineering tasks.
--   **Workflow:** The development process involved a conversational, interactive workflow where I would describe the desired feature or fix, and the Gemini CLI would help implement it by:
-    -   Installing necessary libraries (`npm install`).
-    -   Scaffolding files and directories.
-    -   Reading existing code to understand the context.
-    -   Writing and refactoring code (e.g., updating React components, creating the Supabase client).
-    -   Applying protected routes to the pages.
-    -   Generating documentation like the `README.md` and this developer log.
--   **Editor Integration:** All of this was done within Visual Studio Code, providing a seamless and efficient development experience.
+-   **Supabase Integration:** Configured `@supabase/supabase-js` v2.56.1 with environment variable security
+-   **AuthContext Implementation:** Created a robust React Context for global authentication state management
+-   **Protected Routes:** Implemented HOC pattern for route protection ensuring only authenticated users access protected features
+-   **Authentication UI:** Built login and registration forms with proper error handling and user feedback
 
-This collaborative approach has been instrumental in the rapid setup and development of the project's foundational features.
+### Phase 2: Core Polling Features (Current State)
+
+-   **Poll Creation (`/create`):** 
+    -   Dynamic form with add/remove options functionality
+    -   Minimum 2 options requirement with validation
+    -   Server-side poll and option insertion with transaction-like behavior
+    -   Automatic redirect to polls listing after successful creation
+
+-   **Poll Listing (`/polls`):**
+    -   Grid layout displaying all polls with creation dates
+    -   Owner-specific actions (Edit/Delete) with proper authorization
+    -   Cascade deletion handling for votes and options
+    -   Empty state with call-to-action for first poll creation
+
+-   **Poll Viewing (`/polls/[id]`):**
+    -   Real-time voting interface with radio button selection
+    -   Results visualization with percentage bars and vote counts
+    -   Vote prevention for users who already voted
+    -   Responsive design with proper loading and error states
+
+-   **Poll Editing (`/polls/[id]/edit`):**
+    -   Owner verification and authorization checks
+    -   Pre-populated form with existing poll data
+    -   Option management with add/remove functionality
+    -   Complete option replacement strategy for updates
+
+### Phase 3: UI/UX Excellence
+
+-   **Component Library:** Custom shadcn/ui components (Card, Button, Input) with consistent styling
+-   **Responsive Design:** Mobile-first approach with grid layouts and proper spacing
+-   **User Feedback:** Loading states, error handling, and success notifications
+-   **Accessibility:** Proper form labels, semantic HTML, and keyboard navigation
+
+## 4. Technical Implementation Details
+
+### Component Architecture
+-   **Server Components:** Used for data fetching where possible
+-   **Client Components:** Only when interactivity is required (forms, state management)
+-   **Protected Route Pattern:** HOC wrapper for authentication-required pages
+-   **TypeScript Integration:** Full type safety with interface definitions for all data models
+
+### Data Flow
+-   **Authentication:** Context-based state management with Supabase auth listeners
+-   **Database Operations:** Direct Supabase client calls with proper error handling
+-   **Form Handling:** Controlled components with validation and submission logic
+-   **Real-time Updates:** Local state updates for immediate user feedback
+
+## 5. Development Environment & Tooling
+
+### Modern AI-Assisted Development
+This project showcases the power of AI-assisted development using advanced coding assistants:
+
+-   **Trae AI Integration:** Leveraged for rapid feature development, code review, and architectural decisions
+-   **Conversational Development:** Interactive workflow where features are described and implemented collaboratively
+-   **Code Quality:** AI assistance ensures best practices, proper error handling, and consistent patterns
+-   **Documentation:** Automated generation of comprehensive documentation and developer notes
+
+### File Reference Innovation
+A particularly effective development practice has been using hash symbols (#) to reference files in prompts and conversations:
+
+**Why Hash Symbol File References Are Excellent:**
+-   **Precision:** `#app/polls/[id]/page.tsx` immediately identifies the exact file and its purpose
+-   **Context Clarity:** Provides instant understanding of file location within the project structure
+-   **IDE Integration:** Many modern IDEs recognize and can navigate these references
+-   **Documentation Value:** Creates self-documenting conversations and commit messages
+-   **Collaboration:** Team members can quickly locate and understand file references
+-   **Version Control:** Git commits with hash references are more informative and searchable
+
+This pattern has significantly improved development velocity and code maintainability by making file references unambiguous and immediately actionable.
+
+## 6. Current Project Status
+
+### Completed Features ✅
+-   User authentication (login/register/logout)
+-   Poll creation with dynamic options
+-   Poll listing with owner controls
+-   Poll voting with results visualization
+-   Poll editing with full CRUD operations
+-   Responsive UI with modern design
+-   Protected routes and authorization
+-   Database schema with proper relationships
+
+### Technology Stack Summary
+-   **Framework:** Next.js 15 with App Router
+-   **Language:** TypeScript 5
+-   **Database:** Supabase (PostgreSQL)
+-   **Styling:** Tailwind CSS v4
+-   **Components:** Custom shadcn/ui implementation
+-   **Authentication:** Supabase Auth
+-   **Development:** AI-assisted with Trae AI
+
+### Future Enhancements (Roadmap)
+-   QR code generation for poll sharing
+-   Real-time vote updates
+-   Poll analytics and insights
+-   Social sharing capabilities
+-   Poll templates and categories
+-   Advanced voting options (multiple choice, ranked choice)
+
+This project demonstrates modern full-stack development practices with a focus on user experience, code quality, and maintainable architecture.
