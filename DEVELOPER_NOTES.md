@@ -129,3 +129,21 @@ This pattern has significantly improved development velocity and code maintainab
 -   Advanced voting options (multiple choice, ranked choice)
 
 This project demonstrates modern full-stack development practices with a focus on user experience, code quality, and maintainable architecture.
+
+### Challenge:
+Jest tests were failing with TypeScript errors and module resolution issues. The main problems were missing Jest configuration (jest.config.js) and lack of TypeScript/Jest integration.
+
+Symptoms:
+
+TypeScript syntax errors in test files: this was being flagged "(supabase.auth.getUser as jest.Mock)"
+
+Solution:
+
+Installed Jest TypeScript support: npm install --save-dev ts-jest @types/jest
+Added a jest.config.js file to the project root, via npx ts-jest config:init
+Ensured tsconfig.json had "esModuleInterop": true and correct paths.
+Verified I was running tests from the correct project folder.
+Result:
+Tests now run successfully with TypeScript and path aliases!
+
+
