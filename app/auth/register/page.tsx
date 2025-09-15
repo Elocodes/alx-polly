@@ -6,7 +6,17 @@ import Link from 'next/link';
 import { useAuth } from '../context/auth-context';
 import { useRouter } from 'next/navigation';
 
+/**
+ * @page RegisterPage
+ * @description This page provides a user interface for new user registration.
+ * It includes a form for users to enter their name, email, and password to create an account.
+ * It uses the `useAuth` hook for the registration logic and handles form validation and submission.
+ * Why: Provides a seamless way for new users to join the platform.
+ *
+ * @returns {JSX.Element} - The rendered registration form component.
+ */
 export default function RegisterPage() {
+  // State hooks for managing form inputs
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,19 +24,32 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
 
+  /**
+   * @function handleSubmit
+   * @description Handles the form submission for the registration page.
+   * It validates that the passwords match, calls the register function from the AuthContext,
+   * and redirects the user to the polls page upon successful registration.
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent the default browser form submission behavior.
+
+    // Edge case: Check if the entered passwords match before proceeding.
     if (password !== confirmPassword) {
-      // TODO: Handle password mismatch error
+      // In a real app, this should be a more user-friendly error message.
       console.error('Passwords do not match');
+      // TODO: Handle password mismatch error (e.g., show a notification).
       return;
     }
+
     try {
       await register(name, email, password);
+      // Redirect to the main polls page after a successful registration.
       router.push('/polls');
     } catch (error) {
+      // Basic error handling. Should be improved for production.
       console.error('Registration failed:', error);
-      // TODO: Handle registration errors (e.g., show a notification)
+      // TODO: Handle registration errors (e.g., show a notification for existing email).
     }
   };
 

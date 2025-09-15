@@ -6,20 +6,40 @@ import Link from 'next/link';
 import { useAuth } from '../context/auth-context';
 import { useRouter } from 'next/navigation';
 
+/**
+ * @page LoginPage
+ * @description This page provides a user interface for authentication.
+ * It includes a form for users to enter their email and password to sign in.
+ * It leverages the `useAuth` hook to access the login functionality and handles form submission.
+ * Why: Centralizes the user login experience, providing a clear entry point for users.
+ *
+ * @returns {JSX.Element} - The rendered login form component.
+ */
 export default function LoginPage() {
+  // State hooks for managing form inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
   const router = useRouter();
 
+  /**
+   * @function handleSubmit
+   * @description Handles the form submission for the login page.
+   * It prevents the default form submission, calls the login function from the AuthContext,
+   * and redirects the user to the polls page upon successful authentication.
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent the default browser form submission behavior.
     try {
       await login(email, password);
+      // Redirect to the main polls page after a successful login.
       router.push('/polls');
     } catch (error) {
+      // Basic error handling. In a production app, this should be more user-friendly.
+      // For example, displaying a toast notification with the error message.
       console.error('Login failed:', error);
-      // TODO: Handle login errors (e.g., show a notification)
+      // TODO: Handle login errors (e.g., show a notification to the user).
     }
   };
 
@@ -57,6 +77,7 @@ export default function LoginPage() {
                   <label htmlFor="password" className="text-sm font-medium leading-none">
                     Password
                   </label>
+                  {/* Link to a password reset page, a common feature in authentication flows. */}
                   <Link
                     href="/auth/reset-password"
                     className="text-sm font-medium underline-offset-4 hover:underline"
